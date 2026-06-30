@@ -3408,7 +3408,7 @@ namespace Oxide.Plugins
                                 return;
 
                             if (!boomBox.HasFlag(BoomBox.HasCassette))
-                                boomBox.baseEntity.ClientRPC<string>(RpcTarget.NetworkGroup("OnRadioIPChanged"), boomBox.CurrentRadioIp);
+                                boomBox.baseEntity.ClientRPC(RpcTarget.NetworkGroup("OnRadioIPChanged"), boomBox.CurrentRadioIp);
 
                             boomBox.ServerTogglePlay(true);
 
