@@ -2692,7 +2692,7 @@ namespace Oxide.Plugins
                 if (iSignage is Signage sign)
                 {
                     if (Convert.ToBoolean(signData["locked"]))
-                        sign.SetFlag(BaseEntity.Flags.Locked, true);
+                        SetEntityFlag(sign, BaseEntity.Flags.Locked, true);
 
                     sign.SendNetworkUpdate();
                 }
@@ -2904,7 +2904,7 @@ namespace Oxide.Plugins
                 }
 
                 boatBuildingStation.Netting.gameObject.SetActive(false);
-                boatBuildingStation.SetFlag(BaseEntity.Flags.On, false);
+                SetEntityFlag(boatBuildingStation, BaseEntity.Flags.On, false);
                 boatBuildingStation.StopAutoCloseInvoke();
             }
 
@@ -3062,7 +3062,7 @@ namespace Oxide.Plugins
             var mobileInventoryEntity = entity as MobileInventoryEntity;
             if (mobileInventoryEntity != null)
             {
-                mobileInventoryEntity.SetFlag(MobileInventoryEntity.Ringing, false);
+                SetEntityFlag(mobileInventoryEntity, MobileInventoryEntity.Ringing, false);
             }
 
             var elevator = entity as Elevator;
@@ -3109,7 +3109,7 @@ namespace Oxide.Plugins
                             }
 
                             if (elevator.IsTop != restoreState.IsTop)
-                                elevator.SetFlag(BaseEntity.Flags.Reserved1, restoreState.IsTop);
+                                SetEntityFlag(elevator, BaseEntity.Flags.Reserved1, restoreState.IsTop);
 
                             if (!restoreState.IsTop)
                                 return;
@@ -3202,7 +3202,7 @@ namespace Oxide.Plugins
                 var vendingData = data["vendingmachine"] as Dictionary<string, object>;
 
                 vendingMachine.shopName = vendingData["shopName"].ToString();
-                vendingMachine.SetFlag(BaseEntity.Flags.Reserved4,
+                SetEntityFlag(vendingMachine, BaseEntity.Flags.Reserved4,
                     Convert.ToBoolean(vendingData["isBroadcasting"]));
 
                 var sellOrders = vendingData["sellOrders"] as List<object>;
@@ -3260,7 +3260,7 @@ namespace Oxide.Plugins
                             if (newEntityObj is BaseEntity newEntity && newEntity.IsValid() && !newEntity.IsDestroyed &&
                                 newEntity is ITowing iTowing)
                             {
-                                newEntity.SetFlag(BaseEntity.Flags.Reserved14, false);
+                                SetEntityFlag(newEntity, BaseEntity.Flags.Reserved14, false);
                                 ridableHorse2.towingEntityId = newEntity.net.ID;
                                 ridableHorse2.towableEntity = iTowing;
                                 ridableHorse2.TowAttach();
@@ -3378,14 +3378,15 @@ namespace Oxide.Plugins
             bool skipFlags = entity is Anchor && parent is PlayerBoat;
             if (!skipFlags)
             {
+                using BaseEntity.FlagsUpdateScope flagsUpdateScope = entity.StartSetFlags(BaseEntity.FlagsUpdateMode.SendNetworkUpdate);
                 foreach (var flag in flags)
-                    entity.SetFlag(flag.Key, flag.Value);
+                    flagsUpdateScope.Set(flag.Key, flag.Value);
             }
             
             // If the on flag was saved, toggle it off and enter edit mode so it can be properly triggered on
             if (boatBuildingStation != null && boatBuildingStation.IsOn())
             {
-                boatBuildingStation.SetFlag(BaseEntity.Flags.On, false);
+                SetEntityFlag(boatBuildingStation, BaseEntity.Flags.On, false);
                 boatBuildingStation.EnterEditMode();
             }
 
@@ -3415,8 +3416,8 @@ namespace Oxide.Plugins
                             foreach (var connectedSpeaker in pasteData.ConnectedSpeakers) {
                                 if (connectedSpeaker.IsValid() && !connectedSpeaker.IsDestroyed)
                                 {
-                                    connectedSpeaker.SetFlag(BaseEntity.Flags.Reserved8, false);
-                                    connectedSpeaker.SetFlag(BaseEntity.Flags.Reserved8, true);
+                                    SetEntityFlag(connectedSpeaker, BaseEntity.Flags.Reserved8, false);
+                                    SetEntityFlag(connectedSpeaker, BaseEntity.Flags.Reserved8, true);
                                 }
                             }
                         }, 1f);
@@ -3431,7 +3432,7 @@ namespace Oxide.Plugins
             var industrialCrafter = entity as IndustrialCrafter;
             if (industrialCrafter != null)
             {
-                industrialCrafter.SetFlag(IndustrialCrafter.Crafting, false);
+                SetEntityFlag(industrialCrafter, IndustrialCrafter.Crafting, false);
             }
 
             if (data.ContainsKey("children"))
@@ -3626,7 +3627,7 @@ namespace Oxide.Plugins
                         return;
 
                     // Clear the on flag and rerun sprinkler startup so DoSplash is invoked without clearing fuel state
-                    sprinkler.SetFlag(BaseEntity.Flags.On, false);
+                    SetEntityFlag(sprinkler, BaseEntity.Flags.On, false);
                     sprinkler.TurnOn();
                 });
             }
@@ -3659,7 +3660,7 @@ namespace Oxide.Plugins
                 timerSwitch.timerLength = Convert.ToSingle(ioData["timerLength"]);
                 if(timerSwitch.IsOn())
                 {
-                    timerSwitch.SetFlag(BaseEntity.Flags.On, false);
+                    SetEntityFlag(timerSwitch, BaseEntity.Flags.On, false);
                     timerSwitch.SwitchPressed();
                 }
             }
@@ -4925,7 +4926,7 @@ namespace Oxide.Plugins
                         }
                     }
 
-                    codeLock.SetFlag(BaseEntity.Flags.Locked, true);
+                    SetEntityFlag(codeLock, BaseEntity.Flags.Locked, true);
                 }
             }
             else if (entity.GetComponent<KeyLock>())
@@ -4944,7 +4945,7 @@ namespace Oxide.Plugins
                     {
                         keyLock.keyCode = code & 0x7F;
                         keyLock.firstKeyCreated = true;
-                        keyLock.SetFlag(BaseEntity.Flags.Locked, true);
+                        SetEntityFlag(keyLock, BaseEntity.Flags.Locked, true);
                     }
                 }
 
@@ -4956,6 +4957,12 @@ namespace Oxide.Plugins
                     keyLock.OwnerID = Convert.ToUInt64(data["ownerId"]);
                 }
             }
+        }
+
+        private void SetEntityFlag(BaseEntity entity, BaseEntity.Flags flag, bool state)
+        {
+            using BaseEntity.FlagsUpdateScope flagsUpdateScope = entity.StartSetFlags(BaseEntity.FlagsUpdateMode.SendNetworkUpdate);
+            flagsUpdateScope.Set(flag, state);
         }
         
         private List<BaseEntity> TryPasteSlots(BaseEntity ent, Dictionary<string, object> structure,
