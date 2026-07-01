@@ -2386,11 +2386,7 @@ namespace Oxide.Plugins
                     {
                         photo.AddToEasel(parent);
                     }
-                    else if (!playerBotEntity && entity is not (CustomDoorManipulator
-                        or AutoTurret
-                        or GrowableEntity
-                        or Signage
-                        or BoatBuildingBlock))
+                    else if (!playerBotEntity && ShouldInvokeOnDeployed(entity))
                     {
                         entity.OnDeployed(parent, null, _emptyItem);
                     }
@@ -3606,6 +3602,25 @@ namespace Oxide.Plugins
 
             pasteData.PastedEntities.Add(entity);
             pasteData.CallbackSpawned?.Invoke(entity);
+        }
+
+        private bool ShouldInvokeOnDeployed(BaseEntity entity)
+        {
+            if (entity is CustomDoorManipulator
+                or AutoTurret
+                or GrowableEntity
+                or Signage
+                or BoatBuildingBlock)
+            {
+                return false;
+            }
+
+            if (entity is SimpleBuildingBlock sbb && sbb.variants.IsNullOrEmpty())
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void ProgressIOEntity(Dictionary<string, object> ioData, PasteData pasteData)
