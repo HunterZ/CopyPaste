@@ -4271,7 +4271,8 @@ namespace Oxide.Plugins
 
                 if (i != null)
                 {
-                    if (i.hasCondition)
+                    // ItemModFoodSpoiling handles condition using dataFloat, setting condition here can result in broken stacks and spoiled time remaining
+                    if (i.hasCondition && i.info != null && !i.info.HasComponent<ItemModFoodSpoiling>())
                     {
                         if (item.TryGetValue("maxCondition", out getObj))
                         {
@@ -4450,9 +4451,11 @@ namespace Oxide.Plugins
 
                     if (entity is WaterCatcher waterCatcher)
                     {
+                        var info = i.info; // avoid possibility of a concurrency issue
+                        var amt = i.amount;
                         waterCatcher.Invoke(() => {
                             if (waterCatcher != null && !waterCatcher.IsDestroyed)
-                                waterCatcher.inventory.AddItem(i.info, i.amount);
+                                waterCatcher.inventory.AddItem(info, amt);
                         }, 1f);
                     }
                     else
