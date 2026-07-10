@@ -2789,7 +2789,7 @@ namespace Oxide.Plugins
                 if (iSignage is Signage sign)
                 {
                     if (Convert.ToBoolean(signData["locked"]))
-                        sign.SetFlag(BaseEntity.Flags.Locked, true);
+                        SetEntityFlag(sign, BaseEntity.Flags.Locked, true);
 
                     sign.SendNetworkUpdate();
                 }
@@ -3001,7 +3001,7 @@ namespace Oxide.Plugins
                 }
 
                 boatBuildingStation.Netting.gameObject.SetActive(false);
-                boatBuildingStation.SetFlag(BaseEntity.Flags.On, false);
+                SetEntityFlag(boatBuildingStation, BaseEntity.Flags.On, false);
                 boatBuildingStation.StopAutoCloseInvoke();
             }
 
@@ -3159,7 +3159,7 @@ namespace Oxide.Plugins
             var mobileInventoryEntity = entity as MobileInventoryEntity;
             if (mobileInventoryEntity != null)
             {
-                mobileInventoryEntity.SetFlag(MobileInventoryEntity.Ringing, false);
+                SetEntityFlag(mobileInventoryEntity, MobileInventoryEntity.Ringing, false);
             }
 
             var elevator = entity as Elevator;
