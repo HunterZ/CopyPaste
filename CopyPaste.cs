@@ -2450,9 +2450,9 @@ namespace Oxide.Plugins
                 {
                     var playerBoat = parent as PlayerBoat;
                     bool needsNormalParenting = entity is DroppedItem;
-                    bool playerBotEntity = playerBoat != null && !needsNormalParenting;
+                    bool playerBoatEntity = playerBoat != null && !needsNormalParenting;
 
-                    if (playerBotEntity)
+                    if (playerBoatEntity)
                     {
                         if (!pasteData.playerBoats.ContainsKey(playerBoat))
                             pasteData.playerBoats[playerBoat] = new();
@@ -2487,7 +2487,7 @@ namespace Oxide.Plugins
                     {
                         photo.AddToEasel(parent);
                     }
-                    else if (!playerBotEntity && ShouldInvokeOnDeployed(entity))
+                    else if (!playerBoatEntity && ShouldInvokeOnDeployed(entity))
                     {
                         entity.OnDeployed(parent, null, _emptyItem);
                     }
